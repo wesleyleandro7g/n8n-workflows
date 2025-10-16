@@ -16,6 +16,7 @@ import os
 import asyncio
 from pathlib import Path
 import uvicorn
+import sqlite3
 
 from workflow_db import WorkflowDatabase
 
@@ -497,6 +498,127 @@ async def search_workflows_by_category(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error searching by category: {str(e)}")
+
+@app.get("/api/workflows/by-json-category/{category}", response_model=SearchResponse)
+async def search_by_json_category(
+    category: str,
+    page: int = Query(1, ge=1, description="Page number"),
+    per_page: int = Query(20, ge=1, le=100, description="Items per page")
+):
+    """Search workflows using categories from search_categories.json.
+    
+    Categories include:
+    - AI Agent Development
+    - Business Process Automation
+    - Communication & Messaging
+    - Data Processing & Analysis
+    - And more...
+    """
+    try:
+        # Load category mappings from search_categories.json
+        search_file = Path("context/search_categories.json")
+        if not search_file.exists():
+            raise HTTPException(status_code=404, detail="Category mappings file not found")
+        
+        with open(search_file, 'r', encoding='utf-8') as f:
+            category_data = json.load(f)
+        
+        # Filter workflows by category - exact match
+        matching_filenames = [
+            item.get('filename') 
+            for item in category_data 
+            if item.get('category') == category and item.get('filename')
+        ]
+        
+        if not matching_filenames:
+            return SearchResponse(
+                workflows=[],
+                total=0,
+                page=page,
+                per_page=per_page,
+                pages=0,
+                query=f"json_category:{category}",
+                filters={"json_category": category}
+            )
+        
+        # Get workflows from database
+        offset = (page - 1) * per_page
+        conn = sqlite3.connect(db.db_path)
+        conn.row_factory = sqlite3.Row
+        
+        # Create placeholders for SQL IN clause
+        placeholders = ','.join(['?' for _ in matching_filenames])
+        
+        # Count total matching workflows
+        count_query = f"SELECT COUNT(*) as total FROM workflows WHERE filename IN ({placeholders})"
+        total = conn.execute(count_query, matching_filenames).fetchone()['total']
+        
+        # Get paginated results
+        query = f"""
+            SELECT * FROM workflows 
+            WHERE filename IN ({placeholders})
+            ORDER BY analyzed_at DESC
+            LIMIT {per_page} OFFSET {offset}
+        """
+        
+        cursor = conn.execute(query, matching_filenames)
+        rows = cursor.fetchall()
+        conn.close()
+        
+        # Convert to Pydantic models
+        workflow_summaries = []
+        for row in rows:
+            try:
+                workflow = dict(row)
+                # Parse JSON fields
+                workflow['integrations'] = json.loads(workflow.get('integrations') or '[]')
+                raw_tags = json.loads(workflow.get('tags') or '[]')
+                
+                # Clean tags (handle dict format)
+                clean_tags = []
+                for tag in raw_tags:
+                    if isinstance(tag, dict):
+                        clean_tags.append(tag.get('name', str(tag.get('id', 'tag'))))
+                    else:
+                        clean_tags.append(str(tag))
+                workflow['tags'] = clean_tags
+                
+                # Create clean workflow dict
+                clean_workflow = {
+                    'id': workflow.get('id'),
+                    'filename': workflow.get('filename', ''),
+                    'name': workflow.get('name', ''),
+                    'active': workflow.get('active', False),
+                    'description': workflow.get('description', ''),
+                    'trigger_type': workflow.get('trigger_type', 'Manual'),
+                    'complexity': workflow.get('complexity', 'low'),
+                    'node_count': workflow.get('node_count', 0),
+                    'integrations': workflow.get('integrations', []),
+                    'tags': workflow.get('tags', []),
+                    'created_at': workflow.get('created_at'),
+                    'updated_at': workflow.get('updated_at')
+                }
+                workflow_summaries.append(WorkflowSummary(**clean_workflow))
+            except Exception as e:
+                print(f"Error converting workflow {workflow.get('filename', 'unknown')}: {e}")
+                continue
+        
+        pages = (total + per_page - 1) // per_page
+        
+        return SearchResponse(
+            workflows=workflow_summaries,
+            total=total,
+            page=page,
+            per_page=per_page,
+            pages=pages,
+            query=f"json_category:{category}",
+            filters={"json_category": category}
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error searching by JSON category: {str(e)}")
 
 # Custom exception handler for better error responses
 @app.exception_handler(Exception)
