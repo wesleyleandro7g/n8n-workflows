@@ -5,680 +5,76 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>⚡ N8N Workflow Documentation</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#3b82f6',
+              dark: '#2563eb'
+            }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    /* Modern CSS Reset and Base */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    :root {
-      --primary: #3b82f6;
-      --primary-dark: #2563eb;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --error: #ef4444;
-      --bg: #ffffff;
-      --bg-secondary: #f8fafc;
-      --bg-tertiary: #f1f5f9;
-      --text: #1e293b;
-      --text-secondary: #64748b;
-      --text-muted: #94a3b8;
-      --border: #e2e8f0;
-      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    }
-
-    [data-theme="dark"] {
-      --bg: #0f172a;
-      --bg-secondary: #1e293b;
-      --bg-tertiary: #334155;
-      --text: #f8fafc;
-      --text-secondary: #cbd5e1;
-      --text-muted: #64748b;
-      --border: #475569;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      transition: all 0.2s ease;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1rem;
-    }
-
-    /* Header */
-    .header {
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border);
-      padding: 2rem 0;
-      text-align: center;
-    }
-
-    .title {
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-      color: var(--primary);
-    }
-
-    .subtitle {
-      font-size: 1.125rem;
-      color: var(--text-secondary);
-      margin-bottom: 2rem;
-    }
-
-    .stats {
-      display: flex;
-      gap: 2rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .stat {
-      text-align: center;
-      min-width: 100px;
-    }
-
-    .stat-number {
-      display: block;
-      font-size: 1.875rem;
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    .stat-label {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    /* Controls */
-    .controls {
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      padding: 1.5rem 0;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .search-section {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .search-input {
-      flex: 1;
-      padding: 0.75rem 1rem;
-      border: 1px solid var(--border);
-      border-radius: 0.5rem;
-      background: var(--bg);
-      color: var(--text);
-      font-size: 1rem;
-      min-width: 300px;
-    }
-
-    .search-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
-    }
-
-    .filter-section {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .filter-group {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .filter-group label {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-
-    .filter-group select {
-      padding: 0.5rem;
-      border: 1px solid var(--border);
-      border-radius: 0.375rem;
-      background: var(--bg);
-      color: var(--text);
-      font-size: 0.875rem;
-    }
-
-    .theme-toggle {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border);
-      border-radius: 0.5rem;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      font-size: 1rem;
-      margin-left: auto;
-    }
-
-    .results-info {
-      margin-top: 1rem;
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-    }
-
-    /* Main Content */
-    .main {
-      padding: 2rem 0;
-    }
-
-    /* States */
-    .state {
-      text-align: center;
-      padding: 4rem 2rem;
-    }
-
-    .state .icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-    }
-
-    .state h3 {
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-      color: var(--text);
-    }
-
-    .state p {
-      color: var(--text-secondary);
-      margin-bottom: 2rem;
-    }
-
-    .retry-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 500;
-    }
-
-    .retry-btn:hover {
-      background: var(--primary-dark);
-    }
-
-    /* Workflow Grid */
-    .workflow-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .workflow-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      padding: 1.5rem;
-      box-shadow: var(--shadow);
-      transition: all 0.2s ease;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .workflow-card:hover {
-      box-shadow: var(--shadow-lg);
-      border-color: var(--primary);
-      transform: translateY(-2px);
-    }
-
-    .workflow-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-    }
-
-    .workflow-meta {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-
-    .status-active {
-      background: var(--success);
-    }
-
-    .status-inactive {
-      background: var(--text-muted);
-    }
-
-    .complexity-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-
-    .complexity-low {
-      background: var(--success);
-    }
-
-    .complexity-medium {
-      background: var(--warning);
-    }
-
-    .complexity-high {
-      background: var(--error);
-    }
-
-    .trigger-badge {
-      background: var(--primary);
-      color: white;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.375rem;
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
-
-    .category-badge {
-      background: var(--bg-tertiary);
-      color: var(--text-secondary);
-      padding: 0.125rem 0.375rem;
-      border-radius: 0.25rem;
-      font-size: 0.75rem;
-      border: 1px solid var(--border);
-      font-weight: 500;
-    }
-
-    .workflow-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: var(--text);
-      line-height: 1.4;
-    }
-
-    .workflow-description {
-      color: var(--text-secondary);
-      margin-bottom: 1rem;
-      line-height: 1.5;
-    }
-
-    .workflow-integrations {
-      margin-top: 1rem;
-    }
-
-    .integrations-title {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-      margin-bottom: 0.5rem;
-    }
-
-    .integrations-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.25rem;
-    }
-
-    .integration-tag {
-      background: var(--bg-tertiary);
-      color: var(--text-secondary);
-      padding: 0.125rem 0.5rem;
-      border-radius: 0.25rem;
-      font-size: 0.75rem;
-      border: 1px solid var(--border);
-    }
-
-    .workflow-actions {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border);
-    }
-
-    .action-btn {
-      padding: 0.5rem 1rem;
-      border: 1px solid var(--border);
-      border-radius: 0.375rem;
-      background: var(--bg);
-      color: var(--text);
-      text-decoration: none;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .action-btn:hover {
-      background: var(--bg-tertiary);
-      border-color: var(--primary);
-    }
-
-    .action-btn.primary {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-
-    .action-btn.primary:hover {
-      background: var(--primary-dark);
-    }
-
-    /* Load More */
-    .load-more {
-      text-align: center;
-      margin-top: 2rem;
-    }
-
-    .load-more-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 0.75rem 2rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 500;
-    }
-
-    .load-more-btn:hover {
-      background: var(--primary-dark);
-    }
-
-    /* Modal */
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 1rem;
-    }
-
-    .modal-content {
-      background: var(--bg);
-      border-radius: 0.75rem;
-      max-width: 800px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      position: relative;
-    }
-
-    .modal-header {
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .modal-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-
-    .modal-close {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 0.25rem;
-      color: var(--text-secondary);
-    }
-
-    .modal-body {
-      padding: 1.5rem;
-    }
-
-    .workflow-detail {
-      margin-bottom: 1rem;
-    }
-
-    .workflow-detail h4 {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.5rem;
-    }
-
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 0.5rem;
-    }
-
-    .copy-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-    }
-
-    .copy-btn:hover {
-      background: var(--primary-dark);
-    }
-
-    .copy-btn.copied {
-      background: var(--success);
-    }
-
-    .copy-btn.copied:hover {
-      background: var(--success);
-    }
-
-    .json-viewer {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 0.5rem;
-      padding: 1rem;
-      font-family: 'Courier New', monospace;
-      font-size: 0.875rem;
-      overflow-x: auto;
-      max-height: 400px;
-      white-space: pre-wrap;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* Mermaid diagram styling */
-    .mermaid {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 0.5rem;
-      padding: 1rem;
-      text-align: center;
-      overflow: visible;
-      min-height: 300px;
-    }
-
     .mermaid svg {
       max-width: none;
       height: auto;
       transition: transform 0.2s ease;
     }
-
-    .diagram-container {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 0.5rem;
-      padding: 1rem;
-      text-align: center;
-      overflow: hidden;
-      height: 500px;
-      position: relative;
-      cursor: grab;
-      user-select: none;
-    }
-
+    
     .diagram-container.dragging {
       cursor: grabbing;
-    }
-
-    .diagram-container .mermaid {
-      border: none;
-      background: transparent;
-      padding: 0;
-    }
-
-    .diagram-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .zoom-btn {
-      background: var(--bg-tertiary);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 0.25rem;
-      padding: 0.25rem 0.5rem;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      min-width: 32px;
-      height: 32px;
-      justify-content: center;
-    }
-
-    .zoom-btn:hover {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-
-    .zoom-btn:active {
-      transform: scale(0.95);
-    }
-
-    .zoom-info {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      margin-left: 0.5rem;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .title {
-        font-size: 2rem;
-      }
-
-      .stats {
-        gap: 1rem;
-      }
-
-      .search-section,
-      .filter-section {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .search-input {
-        min-width: auto;
-      }
-
-      .theme-toggle {
-        margin-left: 0;
-        align-self: flex-start;
-      }
-
-      .workflow-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .workflow-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-      }
     }
   </style>
 </head>
 
-<body>
+<body class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200">
   <div id="app">
     <!-- Header -->
-    <header class="header">
-      <div class="container">
-        <h1 class="title">⚡ N8N Workflow Documentation</h1>
-        <p class="subtitle">Lightning-fast workflow browser with instant search</p>
-        <div class="stats">
-          <div class="stat">
-            <span class="stat-number" id="totalCount">0</span>
-            <span class="stat-label">Total</span>
+    <header class="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 py-8 text-center">
+      <div class="max-w-7xl mx-auto px-4">
+        <h1 class="text-4xl font-bold mb-2 text-blue-500">⚡ N8N Workflow Documentation</h1>
+        <p class="text-lg text-slate-600 dark:text-slate-300 mb-8">Lightning-fast workflow browser with instant search</p>
+        <div class="flex gap-8 justify-center flex-wrap">
+          <div class="text-center min-w-[100px]">
+            <span class="block text-3xl font-bold text-blue-500" id="totalCount">0</span>
+            <span class="text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total</span>
           </div>
-          <div class="stat">
-            <span class="stat-number" id="activeCount">0</span>
-            <span class="stat-label">Active</span>
+          <div class="text-center min-w-[100px]">
+            <span class="block text-3xl font-bold text-blue-500" id="activeCount">0</span>
+            <span class="text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active</span>
           </div>
-          <div class="stat">
-            <span class="stat-number" id="nodeCount">0</span>
-            <span class="stat-label">Total Nodes</span>
+          <div class="text-center min-w-[100px]">
+            <span class="block text-3xl font-bold text-blue-500" id="nodeCount">0</span>
+            <span class="text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Nodes</span>
           </div>
-          <div class="stat">
-            <span class="stat-number" id="integrationCount">0</span>
-            <span class="stat-label">Integrations</span>
+          <div class="text-center min-w-[100px]">
+            <span class="block text-3xl font-bold text-blue-500" id="integrationCount">0</span>
+            <span class="text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider">Integrations</span>
           </div>
         </div>
       </div>
     </header>
 
     <!-- Controls -->
-    <div class="controls">
-      <div class="container">
-        <div class="search-section">
-          <input type="text" id="searchInput" class="search-input"
+    <div class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 py-6 sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center gap-4 mb-4">
+          <input type="text" id="searchInput" class="flex-1 px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 min-w-[300px]"
             placeholder="Search workflows by name, description, or integration...">
         </div>
 
-        <div class="filter-section">
-          <div class="filter-group">
-            <label for="triggerFilter">Trigger:</label>
-            <select id="triggerFilter">
+        <div class="flex items-center gap-4 flex-wrap">
+          <div class="flex items-center gap-2">
+            <label for="triggerFilter" class="text-sm font-medium text-slate-600 dark:text-slate-300">Trigger:</label>
+            <select id="triggerFilter" class="px-2 py-1 border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm">
               <option value="all">All Types</option>
               <option value="Webhook">Webhook</option>
               <option value="Scheduled">Scheduled</option>
@@ -687,9 +83,9 @@
             </select>
           </div>
 
-          <div class="filter-group">
-            <label for="complexityFilter">Complexity:</label>
-            <select id="complexityFilter">
+          <div class="flex items-center gap-2">
+            <label for="complexityFilter" class="text-sm font-medium text-slate-600 dark:text-slate-300">Complexity:</label>
+            <select id="complexityFilter" class="px-2 py-1 border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm">
               <option value="all">All Levels</option>
               <option value="low">Low (≤5 nodes)</option>
               <option value="medium">Medium (6-15 nodes)</option>
@@ -697,122 +93,122 @@
             </select>
           </div>
 
-          <div class="filter-group">
-            <label for="categoryFilter">Category:</label>
-            <select id="categoryFilter">
+          <div class="flex items-center gap-2">
+            <label for="categoryFilter" class="text-sm font-medium text-slate-600 dark:text-slate-300">Category:</label>
+            <select id="categoryFilter" class="px-2 py-1 border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm">
               <option value="all">All Categories</option>
               <!-- Categories will be populated dynamically -->
             </select>
           </div>
 
-          <div class="filter-group">
-            <label>
-              <input type="checkbox" id="activeOnly">
+          <div class="flex items-center gap-2">
+            <label class="text-sm font-medium text-slate-600 dark:text-slate-300">
+              <input type="checkbox" id="activeOnly" class="rounded border-slate-300 dark:border-slate-600 text-blue-500 focus:ring-blue-500">
               Active only
             </label>
           </div>
 
-          <button id="themeToggle" class="theme-toggle">🌙</button>
+          <button id="themeToggle" class="ml-auto bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-4 py-2 cursor-pointer text-base hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">🌙</button>
         </div>
 
-        <div class="results-info">
+        <div class="mt-4 text-sm text-slate-600 dark:text-slate-300">
           <span id="resultsCount">Loading...</span>
         </div>
       </div>
     </div>
 
     <!-- Main Content -->
-    <main class="main">
-      <div class="container">
+    <main class="py-8">
+      <div class="max-w-7xl mx-auto px-4">
         <!-- Loading State -->
-        <div id="loadingState" class="state loading">
-          <div class="icon">⚡</div>
-          <h3>Loading workflows...</h3>
-          <p>Please wait while we fetch your workflow data</p>
+        <div id="loadingState" class="text-center py-16 px-8">
+          <div class="text-6xl mb-4">⚡</div>
+          <h3 class="text-2xl mb-2">Loading workflows...</h3>
+          <p class="text-slate-600 dark:text-slate-300">Please wait while we fetch your workflow data</p>
         </div>
 
         <!-- Error State -->
-        <div id="errorState" class="state error hidden">
-          <div class="icon">❌</div>
-          <h3>Error Loading Workflows</h3>
-          <p id="errorMessage">Something went wrong. Please try again.</p>
-          <button id="retryBtn" class="retry-btn">Retry</button>
+        <div id="errorState" class="text-center py-16 px-8 hidden">
+          <div class="text-6xl mb-4">❌</div>
+          <h3 class="text-2xl mb-2">Error Loading Workflows</h3>
+          <p id="errorMessage" class="text-slate-600 dark:text-slate-300 mb-8">Something went wrong. Please try again.</p>
+          <button id="retryBtn" class="bg-blue-500 text-white border-none px-6 py-3 rounded-lg cursor-pointer font-medium hover:bg-blue-600 transition-colors">Retry</button>
         </div>
 
         <!-- No Results State -->
-        <div id="noResultsState" class="state hidden">
-          <div class="icon">🔍</div>
-          <h3>No workflows found</h3>
-          <p>Try adjusting your search terms or filters</p>
+        <div id="noResultsState" class="text-center py-16 px-8 hidden">
+          <div class="text-6xl mb-4">🔍</div>
+          <h3 class="text-2xl mb-2">No workflows found</h3>
+          <p class="text-slate-600 dark:text-slate-300">Try adjusting your search terms or filters</p>
         </div>
 
         <!-- Workflows Grid -->
-        <div id="workflowGrid" class="workflow-grid hidden">
+        <div id="workflowGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
           <!-- Workflow cards will be inserted here -->
         </div>
 
         <!-- Load More -->
-        <div id="loadMoreContainer" class="load-more hidden">
-          <button id="loadMoreBtn" class="load-more-btn">Load More</button>
+        <div id="loadMoreContainer" class="text-center mt-8 hidden">
+          <button id="loadMoreBtn" class="bg-blue-500 text-white border-none px-8 py-3 rounded-lg cursor-pointer font-medium hover:bg-blue-600 transition-colors">Load More</button>
         </div>
       </div>
     </main>
 
     <!-- Workflow Detail Modal -->
-    <div id="workflowModal" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2 class="modal-title" id="modalTitle">Workflow Details</h2>
-          <button class="modal-close" id="modalClose">&times;</button>
+    <div id="workflowModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 hidden">
+      <div class="bg-white dark:bg-slate-800 rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+          <h2 class="text-xl font-semibold" id="modalTitle">Workflow Details</h2>
+          <button class="bg-transparent border-none text-2xl cursor-pointer p-1 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100" id="modalClose">&times;</button>
         </div>
-        <div class="modal-body">
-          <div class="workflow-detail">
-            <h4>Description</h4>
-            <p id="modalDescription">Loading...</p>
+        <div class="p-6">
+          <div class="mb-4">
+            <h4 class="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-2">Description</h4>
+            <p id="modalDescription" class="text-slate-700 dark:text-slate-200">Loading...</p>
           </div>
 
-          <div class="workflow-detail">
-            <h4>Statistics</h4>
-            <div id="modalStats">Loading...</div>
+          <div class="mb-4">
+            <h4 class="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-2">Statistics</h4>
+            <div id="modalStats" class="text-slate-700 dark:text-slate-200">Loading...</div>
           </div>
 
-          <div class="workflow-detail">
-            <h4>Integrations</h4>
-            <div id="modalIntegrations">Loading...</div>
+          <div class="mb-4">
+            <h4 class="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-2">Integrations</h4>
+            <div id="modalIntegrations" class="text-slate-700 dark:text-slate-200">Loading...</div>
           </div>
 
-          <div class="workflow-detail">
-            <h4>Actions</h4>
-            <div class="workflow-actions">
-              <a id="downloadBtn" class="action-btn primary" href="#" download>📥 Download JSON</a>
-              <button id="viewJsonBtn" class="action-btn">📄 View JSON</button>
-              <button id="viewDiagramBtn" class="action-btn">📊 View Diagram</button>
+          <div class="mb-4">
+            <h4 class="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-2">Actions</h4>
+            <div class="flex gap-2 flex-wrap">
+              <a id="downloadBtn" class="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-md bg-blue-500 text-white no-underline text-sm font-medium cursor-pointer transition-colors hover:bg-blue-600" href="#" download>📥 Download JSON</a>
+              <button id="viewJsonBtn" class="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-blue-500">📄 View JSON</button>
+              <button id="viewDiagramBtn" class="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-blue-500">📊 View Diagram</button>
             </div>
           </div>
 
-          <div class="workflow-detail hidden" id="jsonSection">
-            <div class="section-header">
-              <h4>Workflow JSON</h4>
-              <button id="copyJsonBtn" class="copy-btn" title="Copy JSON to clipboard">
+          <div class="mb-4 hidden" id="jsonSection">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Workflow JSON</h4>
+              <button id="copyJsonBtn" class="bg-blue-500 text-white border-none px-2 py-1 rounded text-xs cursor-pointer transition-colors flex items-center gap-1 hover:bg-blue-600" title="Copy JSON to clipboard">
                 📋 Copy
               </button>
             </div>
-            <div class="json-viewer" id="jsonViewer">Loading...</div>
+            <div class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-4 font-mono text-sm overflow-x-auto max-h-96 whitespace-pre-wrap" id="jsonViewer">Loading...</div>
           </div>
 
-          <div class="workflow-detail hidden" id="diagramSection">
-            <div class="section-header">
-              <h4>Workflow Diagram</h4>
-              <div class="diagram-controls">
-                <button id="zoomInBtn" class="zoom-btn" title="Zoom In">🔍+</button>
-                <button id="zoomOutBtn" class="zoom-btn" title="Zoom Out">🔍-</button>
-                <button id="zoomResetBtn" class="zoom-btn" title="Reset Zoom">🔄</button>
-                <button id="copyDiagramBtn" class="copy-btn" title="Copy diagram code to clipboard">
+          <div class="mb-4 hidden" id="diagramSection">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Workflow Diagram</h4>
+              <div class="flex items-center gap-2">
+                <button id="zoomInBtn" class="bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-600 rounded px-2 py-1 text-xs cursor-pointer transition-all flex items-center gap-1 min-w-[32px] h-8 justify-center hover:bg-blue-500 hover:text-white hover:border-blue-500 active:scale-95" title="Zoom In">🔍+</button>
+                <button id="zoomOutBtn" class="bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-600 rounded px-2 py-1 text-xs cursor-pointer transition-all flex items-center gap-1 min-w-[32px] h-8 justify-center hover:bg-blue-500 hover:text-white hover:border-blue-500 active:scale-95" title="Zoom Out">🔍-</button>
+                <button id="zoomResetBtn" class="bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-600 rounded px-2 py-1 text-xs cursor-pointer transition-all flex items-center gap-1 min-w-[32px] h-8 justify-center hover:bg-blue-500 hover:text-white hover:border-blue-500 active:scale-95" title="Reset Zoom">🔄</button>
+                <button id="copyDiagramBtn" class="bg-blue-500 text-white border-none px-2 py-1 rounded text-xs cursor-pointer transition-colors flex items-center gap-1 hover:bg-blue-600" title="Copy diagram code to clipboard">
                   📋 Copy
                 </button>
               </div>
             </div>
-            <div id="diagramContainer" class="diagram-container">
+            <div id="diagramContainer" class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-4 text-center overflow-hidden h-[500px] relative cursor-grab select-none">
               <div id="diagramViewer">Loading diagram...</div>
             </div>
           </div>
@@ -1037,16 +433,24 @@
 
       setupTheme() {
         const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
+        if (savedTheme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
         this.updateThemeToggle(savedTheme);
       }
 
       toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        this.updateThemeToggle(newTheme);
+        const isDark = document.documentElement.classList.contains('dark');
+        
+        if (isDark) {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+          this.updateThemeToggle('light');
+        } else {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+          this.updateThemeToggle('dark');
+        }
       }
 
       updateThemeToggle(theme) {
@@ -1339,7 +743,7 @@
         this.elements.workflowGrid.innerHTML = html;
 
         // Add click handlers to cards
-        this.elements.workflowGrid.querySelectorAll('.workflow-card').forEach((card, index) => {
+        this.elements.workflowGrid.querySelectorAll('[data-filename]').forEach((card, index) => {
           card.addEventListener('click', () => {
             this.openWorkflowDetail(this.state.workflows[index]);
           });
@@ -1347,37 +751,38 @@
       }
 
       createWorkflowCard(workflow) {
-        const statusClass = workflow.active ? 'status-active' : 'status-inactive';
-        const complexityClass = `complexity-${workflow.complexity}`;
+        const statusClass = workflow.active ? 'bg-green-500' : 'bg-slate-400';
+        const complexityClass = workflow.complexity === 'low' ? 'bg-green-500' : 
+                               workflow.complexity === 'medium' ? 'bg-yellow-500' : 'bg-red-500';
         const category = this.getWorkflowCategory(workflow.filename);
 
         const integrations = workflow.integrations.slice(0, 5).map(integration =>
-          `<span class="integration-tag">${this.escapeHtml(integration)}</span>`
+          `<span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded text-xs border border-slate-200 dark:border-slate-600">${this.escapeHtml(integration)}</span>`
         ).join('');
 
         const moreIntegrations = workflow.integrations.length > 5
-          ? `<span class="integration-tag">+${workflow.integrations.length - 5}</span>`
+          ? `<span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded text-xs border border-slate-200 dark:border-slate-600">+${workflow.integrations.length - 5}</span>`
           : '';
 
         return `
-                    <div class="workflow-card" data-filename="${workflow.filename}">
-                        <div class="workflow-header">
-                            <div class="workflow-meta">
-                                <div class="status-dot ${statusClass}"></div>
-                                <div class="complexity-dot ${complexityClass}"></div>
+                    <div class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm transition-all duration-200 cursor-pointer hover:shadow-lg hover:border-blue-500 hover:-translate-y-0.5" data-filename="${workflow.filename}">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                                <div class="w-2 h-2 rounded-full ${statusClass}"></div>
+                                <div class="w-2 h-2 rounded-full ${complexityClass}"></div>
                                 <span>${workflow.node_count} nodes</span>
-                                <span class="category-badge">${this.escapeHtml(category)}</span>
+                                <span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded text-xs border border-slate-200 dark:border-slate-600 font-medium">${this.escapeHtml(category)}</span>
                             </div>
-                            <span class="trigger-badge">${this.escapeHtml(workflow.trigger_type)}</span>
+                            <span class="bg-blue-500 text-white px-2 py-1 rounded-md text-xs font-medium">${this.escapeHtml(workflow.trigger_type)}</span>
                         </div>
                         
-                        <h3 class="workflow-title">${this.escapeHtml(workflow.name)}</h3>
-                        <p class="workflow-description">${this.escapeHtml(workflow.description)}</p>
+                        <h3 class="text-xl font-semibold mb-2 text-slate-900 dark:text-slate-100 leading-tight">${this.escapeHtml(workflow.name)}</h3>
+                        <p class="text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">${this.escapeHtml(workflow.description)}</p>
                         
                         ${workflow.integrations.length > 0 ? `
-                            <div class="workflow-integrations">
-                                <h4 class="integrations-title">Integrations (${workflow.integrations.length})</h4>
-                                <div class="integrations-list">
+                            <div class="mt-4">
+                                <h4 class="text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">Integrations (${workflow.integrations.length})</h4>
+                                <div class="flex flex-wrap gap-1">
                                     ${integrations}
                                     ${moreIntegrations}
                                 </div>
@@ -1395,7 +800,7 @@
         // Update stats
         const category = this.getWorkflowCategory(workflow.filename);
         this.elements.modalStats.innerHTML = `
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         <div><strong>Status:</strong> ${workflow.active ? 'Active' : 'Inactive'}</div>
                         <div><strong>Trigger:</strong> ${workflow.trigger_type}</div>
                         <div><strong>Complexity:</strong> ${workflow.complexity}</div>
@@ -1407,7 +812,7 @@
         // Update integrations
         if (workflow.integrations.length > 0) {
           this.elements.modalIntegrations.innerHTML = workflow.integrations
-            .map(integration => `<span class="integration-tag">${this.escapeHtml(integration)}</span>`)
+            .map(integration => `<span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded text-xs border border-slate-200 dark:border-slate-600 inline-block mr-1 mb-1">${this.escapeHtml(integration)}</span>`)
             .join(' ');
         } else {
           this.elements.modalIntegrations.textContent = 'No integrations found';
