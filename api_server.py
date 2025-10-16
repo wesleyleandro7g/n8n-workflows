@@ -19,6 +19,7 @@ import uvicorn
 import sqlite3
 
 from workflow_db import WorkflowDatabase
+from src.translation_service import get_translation_service
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -39,6 +40,9 @@ app.add_middleware(
 
 # Initialize database
 db = WorkflowDatabase()
+
+# Initialize translation service
+translation_service = get_translation_service()
 
 # Startup function to verify database
 @app.on_event("startup")
@@ -136,9 +140,10 @@ async def search_workflows(
     complexity: str = Query("all", description="Filter by complexity"),
     active_only: bool = Query(False, description="Show only active workflows"),
     page: int = Query(1, ge=1, description="Page number"),
-    per_page: int = Query(20, ge=1, le=100, description="Items per page")
+    per_page: int = Query(20, ge=1, le=100, description="Items per page"),
+    lang: str = Query("en", regex="^(en|pt-br|es)$", description="Language (en, pt-br, es)")
 ):
-    """Search and filter workflows with pagination."""
+    """Search and filter workflows with pagination and translation support."""
     try:
         offset = (page - 1) * per_page
         
@@ -150,6 +155,10 @@ async def search_workflows(
             limit=per_page,
             offset=offset
         )
+        
+        # Translate workflows if needed
+        if lang != 'en':
+            workflows = translation_service.translate_workflows(workflows, lang)
         
         # Convert to Pydantic models with error handling
         workflow_summaries = []
@@ -195,8 +204,11 @@ async def search_workflows(
         raise HTTPException(status_code=500, detail=f"Error searching workflows: {str(e)}")
 
 @app.get("/api/workflows/{filename}")
-async def get_workflow_detail(filename: str):
-    """Get detailed workflow information including raw JSON."""
+async def get_workflow_detail(
+    filename: str,
+    lang: str = Query("en", regex="^(en|pt-br|es)$", description="Language (en, pt-br, es)")
+):
+    """Get detailed workflow information including raw JSON with translation support."""
     try:
         # Get workflow metadata from database
         workflows, _ = db.search_workflows(f'filename:"{filename}"', limit=1)
@@ -204,6 +216,10 @@ async def get_workflow_detail(filename: str):
             raise HTTPException(status_code=404, detail="Workflow not found in database")
         
         workflow_meta = workflows[0]
+        
+        # Translate if needed
+        if lang != 'en':
+            workflow_meta = translation_service.translate_workflow(workflow_meta, lang)
         
         # file_path = Path(__file__).parent / "workflows" / workflow_meta.name / filename
         # print(f"当前工作目录: {workflow_meta}")
@@ -619,6 +635,47 @@ async def search_by_json_category(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error searching by JSON category: {str(e)}")
+
+# Translation endpoints
+@app.get("/api/translations/stats")
+async def get_translation_stats():
+    """Get translation cache statistics."""
+    try:
+        stats = translation_service.get_cache_stats()
+        return {
+            "status": "success",
+            "stats": stats
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching translation stats: {str(e)}")
+
+@app.delete("/api/translations/cache")
+async def clear_translation_cache(
+    workflow_id: Optional[str] = Query(None, description="Clear cache for specific workflow"),
+    language: Optional[str] = Query(None, regex="^(pt-br|es)$", description="Clear cache for specific language")
+):
+    """Clear translation cache."""
+    try:
+        deleted = translation_service.clear_cache(workflow_id=workflow_id, language=language)
+        return {
+            "status": "success",
+            "message": f"Cleared {deleted} cached translations"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error clearing cache: {str(e)}")
+
+@app.get("/api/translations/languages")
+async def get_supported_languages():
+    """Get list of supported languages."""
+    return {
+        "status": "success",
+        "languages": [
+            {"code": "en", "name": "English", "flag": "🇺🇸"},
+            {"code": "pt-br", "name": "Português (Brasil)", "flag": "🇧🇷"},
+            {"code": "es", "name": "Español", "flag": "🇪🇸"}
+        ],
+        "default": "en"
+    }
 
 # Custom exception handler for better error responses
 @app.exception_handler(Exception)

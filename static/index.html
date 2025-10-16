@@ -108,6 +108,15 @@
             </label>
           </div>
 
+          <div class="flex items-center gap-2">
+            <label for="languageSelect" class="text-sm font-medium text-slate-600 dark:text-slate-300">Language:</label>
+            <select id="languageSelect" class="px-2 py-1 border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm">
+              <option value="en">🇺🇸 English</option>
+              <option value="pt-br">🇧🇷 Português</option>
+              <option value="es">🇪🇸 Español</option>
+            </select>
+          </div>
+
           <button id="themeToggle" class="ml-auto bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-4 py-2 cursor-pointer text-base hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">🌙</button>
         </div>
 
@@ -229,6 +238,7 @@
           perPage: 20,
           isLoading: false,
           searchQuery: '',
+          currentLanguage: localStorage.getItem('language') || 'en',
           filters: {
             trigger: 'all',
             complexity: 'all',
@@ -259,6 +269,7 @@
           activeCount: document.getElementById('activeCount'),
           nodeCount: document.getElementById('nodeCount'),
           integrationCount: document.getElementById('integrationCount'),
+          languageSelect: document.getElementById('languageSelect'),
           // Modal elements
           workflowModal: document.getElementById('workflowModal'),
           modalTitle: document.getElementById('modalTitle'),
@@ -363,6 +374,12 @@
           this.loadInitialData();
         });
 
+        // Language selector
+        this.elements.languageSelect.value = this.state.currentLanguage;
+        this.elements.languageSelect.addEventListener('change', (e) => {
+          this.changeLanguage(e.target.value);
+        });
+
         // Theme toggle
         this.elements.themeToggle.addEventListener('click', () => {
           this.toggleTheme();
@@ -451,6 +468,14 @@
           localStorage.setItem('theme', 'dark');
           this.updateThemeToggle('dark');
         }
+      }
+
+      changeLanguage(lang) {
+        console.log(`Changing language to: ${lang}`);
+        this.state.currentLanguage = lang;
+        localStorage.setItem('language', lang);
+        this.state.currentPage = 1;
+        this.resetAndSearch();
       }
 
       updateThemeToggle(theme) {
@@ -626,6 +651,7 @@
               trigger: this.state.filters.trigger,
               complexity: this.state.filters.complexity,
               active_only: this.state.filters.activeOnly,
+              lang: this.state.currentLanguage,
               page: this.state.currentPage,
               per_page: this.state.perPage
             });
@@ -664,6 +690,7 @@
             trigger: this.state.filters.trigger,
             complexity: this.state.filters.complexity,
             active_only: this.state.filters.activeOnly,
+            lang: this.state.currentLanguage,
             page: currentPage,
             per_page: maxPerPage
           });
