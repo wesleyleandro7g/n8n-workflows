@@ -97,8 +97,9 @@ docker-compose*.yml
 k8s/
 helm/
 
-# Scripts (not needed in container)
-scripts/
+# Scripts - KEEP scripts/ directory for Docker startup
+# Only exclude the helper script
+scripts/docker_exec.sh
 
 # CI/CD
 .github/
