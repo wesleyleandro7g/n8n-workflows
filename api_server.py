@@ -141,7 +141,7 @@ async def search_workflows(
     active_only: bool = Query(False, description="Show only active workflows"),
     page: int = Query(1, ge=1, description="Page number"),
     per_page: int = Query(20, ge=1, le=100, description="Items per page"),
-    lang: str = Query("en", regex="^(en|pt-br|es)$", description="Language (en, pt-br, es)")
+    lang: str = Query("en", regex="^(en|pt|es)$", description="Language (en, pt, es)")
 ):
     """Search and filter workflows with pagination and translation support."""
     try:
@@ -206,7 +206,7 @@ async def search_workflows(
 @app.get("/api/workflows/{filename}")
 async def get_workflow_detail(
     filename: str,
-    lang: str = Query("en", regex="^(en|pt-br|es)$", description="Language (en, pt-br, es)")
+    lang: str = Query("en", regex="^(en|pt|es)$", description="Language (en, pt, es)")
 ):
     """Get detailed workflow information including raw JSON with translation support."""
     try:
@@ -652,7 +652,7 @@ async def get_translation_stats():
 @app.delete("/api/translations/cache")
 async def clear_translation_cache(
     workflow_id: Optional[str] = Query(None, description="Clear cache for specific workflow"),
-    language: Optional[str] = Query(None, regex="^(pt-br|es)$", description="Clear cache for specific language")
+    language: Optional[str] = Query(None, regex="^(pt|es)$", description="Clear cache for specific language")
 ):
     """Clear translation cache."""
     try:

@@ -23,7 +23,7 @@ def test_translation():
         workflow_id=workflow_id,
         field_name='name',
         original_text=test_text,
-        target_lang='pt-br'
+        target_lang='pt'
     )
     print(f"🇧🇷 Portuguese: {pt_translation}")
     
@@ -42,7 +42,7 @@ def test_translation():
         workflow_id=workflow_id,
         field_name='name',
         original_text=test_text,
-        target_lang='pt-br'
+        target_lang='pt'
     )
     print(f"✅ Cache working! Got: {pt_cached}")
     

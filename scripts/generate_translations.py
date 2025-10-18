@@ -48,7 +48,7 @@ def generate_all_translations(batch_size: int = 50):
     logger.info(f"✅ Found {total} workflows to translate")
     
     # Languages to translate to (excluding English which is the source)
-    target_languages = ['pt-br', 'es']
+    target_languages = ['pt', 'es']
     
     total_translations = 0
     

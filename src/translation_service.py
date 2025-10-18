@@ -28,7 +28,7 @@ class TranslationService:
     - Support for multiple languages
     """
     
-    SUPPORTED_LANGUAGES = ['en', 'pt-br', 'es']
+    SUPPORTED_LANGUAGES = ['en', 'pt', 'es']
     DEFAULT_LANGUAGE = 'en'
     
     # Fields that should be translated in workflow objects
@@ -121,8 +121,8 @@ class TranslationService:
             # Generate new translation
             self.logger.debug(f"Translating {field_name} for {workflow_id} to {target_lang}")
             
-            # Extract language code (pt-br -> pt, es -> es)
-            lang_code = target_lang.split('-')[0]
+            # Use language code directly
+            lang_code = target_lang
             
             translated = self.translator.translate(
                 original_text,
